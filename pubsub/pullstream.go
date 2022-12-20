@@ -119,7 +119,6 @@ func (s *pullStream) openWithRetry() (pb.Subscriber_StreamingPullClient, error) 
 			}
 			continue
 		}
-		log.Printf("stream open failed with non-retryable error: %v\n", err)
 		return spc, err
 	}
 }
@@ -141,6 +140,7 @@ func (s *pullStream) call(f func(pb.Subscriber_StreamingPullClient) error, opts 
 	for {
 		spc, err = s.get(spc)
 		if err != nil {
+			log.Printf("stream open failed with non-retryable error: %v\n", err)
 			return err
 		}
 		start := time.Now()
