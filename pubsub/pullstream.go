@@ -17,6 +17,7 @@ package pubsub
 import (
 	"context"
 	"io"
+	"log"
 	"sync"
 	"time"
 
@@ -111,12 +112,14 @@ func (s *pullStream) openWithRetry() (pb.Subscriber_StreamingPullClient, error) 
 		spc, err := s.open()
 		bo, shouldRetry := r.Retry(err)
 		if err != nil && shouldRetry {
+			log.Printf("stream open failed with retryable error: %v\n", err)
 			recordStat(s.ctx, StreamRetryCount, 1)
 			if err := gax.Sleep(s.ctx, bo); err != nil {
 				return nil, err
 			}
 			continue
 		}
+		log.Printf("stream open failed with non-retryable error: %v\n", err)
 		return spc, err
 	}
 }
@@ -145,6 +148,7 @@ func (s *pullStream) call(f func(pb.Subscriber_StreamingPullClient) error, opts 
 		if err != nil {
 			bo, shouldRetry := r.Retry(err)
 			if shouldRetry {
+				log.Printf("stream send failed with retryable error: %v\n", err)
 				recordStat(s.ctx, StreamRetryCount, 1)
 				if time.Since(start) < 30*time.Second { // don't sleep if we've been blocked for a while
 					if err := gax.Sleep(s.ctx, bo); err != nil {
@@ -153,6 +157,7 @@ func (s *pullStream) call(f func(pb.Subscriber_StreamingPullClient) error, opts 
 				}
 				continue
 			}
+			log.Printf("stream send failed with non-retryable error: %v\n", err)
 			s.mu.Lock()
 			s.err = err
 			s.mu.Unlock()
