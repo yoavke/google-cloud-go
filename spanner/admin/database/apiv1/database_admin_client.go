@@ -2214,6 +2214,11 @@ func (c *databaseAdminRESTClient) CreateBackup(ctx context.Context, req *databas
 	if req.GetEncryptionConfig().GetKmsKeyName() != "" {
 		params.Add("encryptionConfig.kmsKeyName", fmt.Sprintf("%v", req.GetEncryptionConfig().GetKmsKeyName()))
 	}
+	if items := req.GetEncryptionConfig().GetKmsKeyNames(); len(items) > 0 {
+		for _, item := range items {
+			params.Add("encryptionConfig.kmsKeyNames", fmt.Sprintf("%v", item))
+		}
+	}
 
 	baseUrl.RawQuery = params.Encode()
 
