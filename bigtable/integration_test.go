@@ -3079,7 +3079,13 @@ func TestIntegration_AdminCopyBackup(t *testing.T) {
 	// Create a 2nd cluster in 1st destination project
 	clusterUID := uid.NewSpace("c-", &uid.Options{Short: true})
 	destProj1Inst1Cl2 := clusterUID.New()
-	defer destIAdminClient1.DeleteCluster(ctx, destProj1Inst1, destProj1Inst1Cl2)
+	t.Logf("Creating cluster %v", destProj1Inst1Cl2)
+	defer func() {
+		err := destIAdminClient1.DeleteCluster(ctx, destProj1Inst1, destProj1Inst1Cl2)
+		if err != nil {
+			t.Logf("Failed to delete cluster %v", destProj1Inst1Cl2)
+		}
+	}()
 	err = destIAdminClient1.CreateCluster(ctx, &ClusterConfig{
 		InstanceID:  destProj1Inst1,
 		ClusterID:   destProj1Inst1Cl2,
