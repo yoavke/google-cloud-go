@@ -3086,6 +3086,20 @@ func TestIntegration_AdminCopyBackup(t *testing.T) {
 			t.Logf("Failed to delete cluster %v", destProj1Inst1Cl2)
 		}
 	}()
+	is, err2 := destIAdminClient1.Instances(ctx)
+	if err2 != nil {
+		t.Logf("Instances: %v", err2)
+	}
+	for i, iss := range is {
+		t.Logf("i: %v, iss: %+v", i, iss)
+		cls, err3 := destIAdminClient1.Clusters(ctx, iss.Name)
+		if err3 != nil {
+			t.Logf("Clusters: %v", err3)
+		}
+		for j, cl := range cls {
+			t.Logf("j: %v, cl: %+v", j, cl)
+		}
+	}
 	err = destIAdminClient1.CreateCluster(ctx, &ClusterConfig{
 		InstanceID:  destProj1Inst1,
 		ClusterID:   destProj1Inst1Cl2,
